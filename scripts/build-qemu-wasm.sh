@@ -39,6 +39,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Install the upstream browser-networking demo dependencies before its webpack step.
+(
+  cd "$QEMU_SRC/examples/networking/htdocs"
+  npm ci
+)
 CI_SCRIPT="$WORK/create-images-ci.sh"
 sed 's/docker exec -it/docker exec/g' "$DEMO_SRC/create-images.sh" > "$CI_SCRIPT"
 chmod +x "$CI_SCRIPT"
