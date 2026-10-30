@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WebDroid — x86_64 Linux boot test</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" crossorigin="anonymous">
+<style>
+body{margin:0;background:#0c0f16;color:#edf2fb;font:14px system-ui,sans-serif}main{max-width:980px;margin:32px auto;padding:0 18px}a{color:#aebcff}h1{font-size:25px}.muted{color:#9aa6ba}.panel{background:#151a25;border:1px solid #30394c;border-radius:14px;padding:18px;margin:18px 0}#terminal{height:480px;background:#05070b;padding:8px;border-radius:8px}.status{padding:10px;border-radius:8px;background:#202a3d;color:#cbd7ef}button{background:#8295ff;border:0;border-radius:8px;padding:9px 13px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<script src="../coi-serviceworker.js"></script>
+<script src="./alpine-x86_64-module.js"></script>
+<script src="../runtime/alpine-x86_64/load-rootfs.js"></script>
+<script src="../runtime/alpine-x86_64/load-kernel.js"></script>
+<script src="../runtime/alpine-x86_64/load-initramfs.js"></script>
+<script src="../runtime/alpine-x86_64/load-rom.js"></script>
+<main>
+<p><a href="../index.html">← WebDroidへ戻る</a></p>
+<h1>x86_64 Linux 起動テスト</h1>
+<p class="muted">QEMU/Wasm上でAlpine Linuxを起動する検証画面です。Androidではありません。ネットワーク機能はこのテストでは無効です。</p>
+<div class="panel">
+<div id="status" class="status">ブラウザの分離状態を確認しています…</div>
+<p><button id="start">Linuxを起動</button></p>
+<div id="terminal"></div>
+</div>
+<p class="muted">初回起動には時間がかかる場合があります。静的HTTPS配信とCross-Origin Isolationが必要です。ローカルのfile://では起動できません。</p>
+</main>
+<script type="module">
+import "https://unpkg.com/xterm@5.3.0/lib/xterm.js";
+import "https://unpkg.com/xterm-pty/index.js";
+import initEmscriptenModule from "../runtime/alpine-x86_64/out.js";
+const status=document.getElementById("status");
+const term=new Terminal({convertEol:true,cols:100,rows:28,theme:{background:"#05070b"}});
+term.open(document.getElementById("terminal"));
+let started=false;
+document.getElementById("start").addEventListener("click",async()=>{
+ if(started)return;
+ if(!crossOriginIsolated||typeof SharedArrayBuffer==="undefined"){status.textContent="起動条件不足: HTTPSで開き、COIサービスワーカーの再読み込み完了後に再試行してください。";return}
+ started=true;status.textContent="QEMU/Wasmを初期化しています…";
+ try{
+  const {master,slave}=openpty();term.loadAddon(master);Module.pty=slave;
+  await initEmscriptenModule(Module);
+  const oldPoll=Module.TTY.stream_ops.poll,pty=Module.pty;
+  Module.TTY.stream_ops.poll=function(stream,timeout){if(!pty.readable)return (pty.readable?1:0)|(pty.writable?4:0);return oldPoll.call(stream,timeout)};
+  status.textContent="QEMUが起動しました。Alpine Linuxのコンソール出力を待っています…";
+ }catch(error){started=false;status.textContent="起動失敗: "+(error?.message||String(error));console.error(error)}
+});
+status.textContent=location.protocol==="file:"?"file://ではCOIサービスワーカーを使えません。HTTPSで開いてください。":(crossOriginIsolated?"起動条件を満たしています。":"COIサービスワーカーを準備中です。初回は自動再読み込み後に再試行してください。");
+</script>
+</body></html>
