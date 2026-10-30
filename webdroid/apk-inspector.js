@@ -72,29 +72,37 @@ function parseBinaryManifest(buffer) {
   return result;
 }
 async function findManifest(file) {
-  const bytes = await file.arrayBuffer();
-  const view = new DataView(bytes);
+  const tailStart = Math.max(0, file.size - 65557);
+  const tailBuffer = await file.slice(tailStart).arrayBuffer();
+  const tail = new DataView(tailBuffer);
   let eocd = -1;
-  for (let p = view.byteLength - 22; p >= Math.max(0, view.byteLength - 65557); p--) {
-    if (view.getUint32(p, true) === 0x06054b50) { eocd = p; break; }
+  for (let p = tail.byteLength - 22; p >= Math.max(0, tail.byteLength - 65557); p--) {
+    if (tail.getUint32(p, true) === 0x06054b50) { eocd = p; break; }
   }
   if (eocd < 0) throw new Error("APK内のZIP目録が見つかりません");
-  const entries = view.getUint16(eocd + 10, true);
-  let p = view.getUint32(eocd + 16, true);
-  for (let i = 0; i < entries; i++) {
-    if (view.getUint32(p, true) !== 0x02014b50) throw new Error("ZIP目録が破損しています");
-    const method = view.getUint16(p + 10, true);
-    const compressedSize = view.getUint32(p + 20, true);
-    const nameLength = view.getUint16(p + 28, true);
-    const extraLength = view.getUint16(p + 30, true);
-    const commentLength = view.getUint16(p + 32, true);
-    const localOffset = view.getUint32(p + 42, true);
-    const name = decoder.decode(new Uint8Array(bytes, p + 46, nameLength));
+  const entries = tail.getUint16(eocd + 10, true);
+  const directorySize = tail.getUint32(eocd + 12, true);
+  const directoryOffset = tail.getUint32(eocd + 16, true);
+  if (directoryOffset === 0xffffffff || directorySize === 0xffffffff) throw new Error("ZIP64 APKには未対応です");
+  const directoryBuffer = await file.slice(directoryOffset, directoryOffset + directorySize).arrayBuffer();
+  const directory = new DataView(directoryBuffer);
+  let p = 0;
+  for (let i = 0; i < entries && p + 46 <= directory.byteLength; i++) {
+    if (directory.getUint32(p, true) !== 0x02014b50) throw new Error("ZIP目録が破損しています");
+    const method = directory.getUint16(p + 10, true);
+    const compressedSize = directory.getUint32(p + 20, true);
+    const nameLength = directory.getUint16(p + 28, true);
+    const extraLength = directory.getUint16(p + 30, true);
+    const commentLength = directory.getUint16(p + 32, true);
+    const localOffset = directory.getUint32(p + 42, true);
+    const name = decoder.decode(new Uint8Array(directoryBuffer, p + 46, nameLength));
     if (name === "AndroidManifest.xml") {
-      const localNameLength = view.getUint16(localOffset + 26, true);
-      const localExtraLength = view.getUint16(localOffset + 28, true);
+      const localHeader = new DataView(await file.slice(localOffset, localOffset + 30).arrayBuffer());
+      if (localHeader.getUint32(0, true) !== 0x04034b50) throw new Error("ManifestのZIPヘッダーが破損しています");
+      const localNameLength = localHeader.getUint16(26, true);
+      const localExtraLength = localHeader.getUint16(28, true);
       const dataOffset = localOffset + 30 + localNameLength + localExtraLength;
-      const compressed = bytes.slice(dataOffset, dataOffset + compressedSize);
+      const compressed = await file.slice(dataOffset, dataOffset + compressedSize).arrayBuffer();
       let manifest;
       if (method === 0) manifest = compressed;
       else if (method === 8 && typeof DecompressionStream !== "undefined") {
@@ -109,7 +117,7 @@ async function findManifest(file) {
 export async function inspectApk(file) {
   let sha256 = null;
   try {
-    if (globalThis.crypto?.subtle) {
+    if (globalThis.crypto?.subtle && file.size <= 128 * 1024 * 1024) {
       const digest = await globalThis.crypto.subtle.digest("SHA-256", await file.arrayBuffer());
       sha256 = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
     }
