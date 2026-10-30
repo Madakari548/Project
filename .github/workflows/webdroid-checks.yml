@@ -6,6 +6,9 @@ on:
     paths:
       - "webdroid/**"
       - "scripts/check-webdroid.mjs"
+      - "scripts/test-apk-inspector.mjs"
+      - "scripts/fetch-lineage-vm.py"
+      - "scripts/serve-coi.py"
       - ".github/workflows/webdroid-checks.yml"
   pull_request:
     paths:
@@ -25,5 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/fetch-lineage-vm.py scripts/serve-coi.py
       - name: Check JavaScript and project wiring
         run: node scripts/check-webdroid.mjs
