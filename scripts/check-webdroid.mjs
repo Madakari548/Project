@@ -23,7 +23,7 @@ if (apkTest.status !== 0) { console.error(apkTest.stderr || apkTest.stdout); fai
 const inspectorCheck = run(["--check", resolve(root, "webdroid/apk-inspector.js")]);
 if (inspectorCheck.status !== 0) { console.error(inspectorCheck.stderr); fail("APK inspector JavaScript syntax"); } else console.log("PASS APK inspector JavaScript syntax");
 const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).join("\n");
-const inlineCheck = run(["--check"], inline);
+const inlineCheck = run(["--check", "-"], inline);
 if (inlineCheck.status !== 0) { console.error(inlineCheck.stderr); fail("dashboard inline JavaScript syntax"); } else console.log("PASS dashboard inline JavaScript syntax");
 for (const path of ["webdroid/ENGINE_PLAN.md","webdroid/ENGINE_RESEARCH.md","webdroid/engine/README.md","scripts/build-qemu-wasm.sh","scripts/check-qemu-wasm.sh"]) {
   if (!existsSync(resolve(root, path))) fail("required project file missing: " + path);
