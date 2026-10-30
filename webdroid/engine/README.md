@@ -23,13 +23,13 @@ The build script clones the two upstream repositories and runs the upstream demo
 - ARM64 QEMU/Wasm engine and a Raspberry Pi 3A+ BusyBox Linux guest
 - x86_64 QEMU/Wasm engine and an Alpine Linux guest
 
-GitHub Actions runs this automatically when the build configuration changes and stores generated files as a 14-day workflow artifact.
+GitHub Actions runs this automatically when the build configuration changes, starts a COOP/COEP-enabled local server, and uses headless Chromium to verify that both guests print a Linux kernel banner. Generated engine and guest files are stored as a 14-day workflow artifact.
 
 The upstream build uses Emscripten 3.1.50 and is experimental. The exact upstream commit IDs are written to `webdroid/runtime/BUILD_INFO.txt` in the artifact.
 
 ## What this build proves — and what it does not
 
-A successful build plus smoke test proves that the two QEMU/Wasm targets and example Linux images were built. A browser boot test is still required to prove that the runtime works in WebDroid's page.
+A successful CI run proves that both QEMU/Wasm targets were built and that the ARM64 and x86_64 guest kernels emitted their Linux boot banners in Chromium. It does not yet prove a complete interactive userspace session or Android boot.
 
 It does **not** prove that:
 - an Android kernel/system image boots;
