@@ -5,7 +5,7 @@ var Module = window.Module || {};
   Module["arguments"] = [
     "-nographic", "-M", "pc", "-m", "512M", "-accel", "tcg,tb-size=500",
     "-L", "/pack-rom/",
-    "-nic", "none",
+    "-netdev", "socket,id=vmnic,connect=localhost:8888", "-device", "virtio-net-pci,netdev=vmnic",
     "-kernel", "/pack-kernel/vmlinuz-virt",
     "-initrd", "/pack-initramfs/initramfs-virt",
     "-append", "console=ttyS0 root=/dev/vda noautodetect hostname=webdroid",
