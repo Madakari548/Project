@@ -16,6 +16,8 @@ const checks = [
   ["APK files can be downloaded from local archive", html.includes("download.textContent='保存'")],
   ["APK manifest metadata is displayed", html.includes("row.manifest?.packageName")],
   ["QEMU Linux smoke tests are explicitly not Android", readFileSync(resolve(root, "webdroid/qemu-smoke/raspi3ap.html"), "utf8").includes("Androidではありません")],
+  ["x86_64 Linux page wires the browser network proxy", readFileSync(resolve(root, "webdroid/qemu-smoke/alpine-x86_64.html"), "utf8").includes("Stack.Start") && readFileSync(resolve(root, "webdroid/qemu-smoke/alpine-x86_64-module.js"), "utf8").includes("virtio-net-pci")],
+  ["Android guest acquisition workflow is documented", html.includes("android-guest-assets.yml") && existsSync(resolve(root, "scripts/fetch-lineage-vm.py"))],
 ];
 for (const [name, ok] of checks) { console.log((ok ? "PASS " : "FAIL ") + name); if (!ok) fail(name); }
 const apkTest = run([resolve(root, "scripts/test-apk-inspector.mjs")]);
