@@ -1,0 +1,32 @@
+name: Prepare Android guest images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/fetch-lineage-vm.py"
+      - ".github/workflows/android-guest-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: webdroid-android-guest-assets
+  cancel-in-progress: true
+
+jobs:
+  fetch-android-vms:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download latest ARM64 and x86_64 LineageOS VM releases
+        run: python3 scripts/fetch-lineage-vm.py
+      - name: Upload inspected Android guest images
+        uses: actions/upload-artifact@v4
+        with:
+          name: webdroid-lineage-android-guests
+          path: android-guest-assets/
+          if-no-files-found: error
+          retention-days: 7
