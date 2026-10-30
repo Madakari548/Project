@@ -1,0 +1,8 @@
+# Generated emulator builds and guest images
+.build/
+webdroid/runtime/
+android-guest-assets/
+__pycache__/
+**/__pycache__/
+webdroid/qemu-smoke/node_modules/
+webdroid/qemu-smoke/package-lock.json
