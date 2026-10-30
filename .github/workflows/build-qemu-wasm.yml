@@ -39,8 +39,9 @@ jobs:
         run: bash scripts/check-qemu-wasm.sh
 
       - name: Install Playwright and Chromium
+        working-directory: webdroid/qemu-smoke
         run: |
-          npm install --no-save playwright
+          npm install
           npx playwright install --with-deps chromium
 
       - name: Start isolated static test server
