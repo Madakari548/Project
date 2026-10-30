@@ -29,3 +29,12 @@
 - Raspberry Pi kernel source used by the upstream image recipe: https://github.com/raspberrypi/linux
 - The upstream recipe builds a BusyBox-based ARM64 guest and an Alpine Linux x86_64 guest. These are test operating systems only, not Android images.
 - Guest image contents retain their respective upstream licenses and package notices.
+
+## Android guest candidate (not bundled)
+
+- Project: https://github.com/jqssun/android-lineage-qemu
+- Builder repository license: GPL-3.0.
+- Android guest candidate: LineageOS 24.0 virtual-machine builds for ARM64 and x86_64.
+- The guest archives are downloaded only as temporary CI artifacts for compatibility research; they are not committed to this repository or redistributed by WebDroid.
+- LineageOS and Android components have their own licenses and trademark terms. Review the exact notices shipped in each downloaded image before any redistribution.
+- Google Apps / Google Play services are not included in the open-source VM build and must not be bundled without appropriate authorization and licensing.
