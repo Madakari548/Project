@@ -23,7 +23,7 @@ function makeManifest() {
   for(const [name,value] of attrs) attrBytes.push(Buffer.concat([u32(0xffffffff),u32(name),u32(value),u16(8),Buffer.from([0,3]),u32(value)]));
   const start=Buffer.concat([
     u16(0x0102),u16(16),u32(16+20+attrBytes.reduce((n,b)=>n+b.length,0)),
-    u32(1),u32(0xffffffff),u32(0xffffffff),u32(0),u32(20),u16(20),u16(attrs.length),u16(0),u16(0),u16(0),
+    u32(1),u32(0xffffffff),u32(0xffffffff),u32(0),u16(20),u16(20),u16(attrs.length),u16(0),u16(0),u16(0),
     ...attrBytes
   ]);
   const end=Buffer.concat([u16(0x0103),u16(16),u32(24),u32(1),u32(0xffffffff),u32(0xffffffff),u32(0)]);
