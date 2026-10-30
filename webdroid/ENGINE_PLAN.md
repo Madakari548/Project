@@ -43,10 +43,9 @@ Google Play services are proprietary Google components. An open-source emulator 
 
 ### M2 — Android guest boot
 - [x] Select LineageOS-for-QEMU as the first Android VM candidate for ARM64 and x86_64
-- [ ] Retrieve and inspect the published VM archives and their licenses
-- [ ] Confirm QEMU/Wasm support for the candidate VM device model and firmware
-- [ ] Select a legally distributable AOSP-derived Android image and compatible kernel
-- [ ] Confirm the QEMU machine/device model matches the Android image
+- [ ] Retrieve and inspect the published VM archives, exact file layout, checksums, and licenses
+- [ ] Confirm QEMU/Wasm support for the required ARM `virt` / x86 `q35` machines, UEFI, qcow2, VirtIO GPU, USB, and networking
+- [ ] Validate that the shipped LineageOS kernels and firmware boot with the browser QEMU build
 - [ ] Boot a real Android guest in the browser
 - [ ] Display guest framebuffer and provide touch/pointer/keyboard input
 - [ ] Persist the Android virtual disk across sessions
