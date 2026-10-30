@@ -1,56 +1,62 @@
 # WebDroid engine plan
 
-## Non-negotiable product constraints
-- Browser execution; no user-operated backend server.
-- Prefer a distributable local HTML entry point.
-- Target ARM64 and x86_64 guests, but report actual engine support rather than advertising unverified compatibility.
+## Product constraints
+
+- Browser execution; no user-operated application backend.
+- Prefer a distributable local HTML entry point, while allowing static HTTPS hosting when browser security features require it.
+- Target ARM64 and x86_64 guests, but report actual tested compatibility rather than assuming it from the UI.
 - Persistent local storage and touch, keyboard, pointer, audio, and network adapters.
 - Multiple isolated device instances.
 
 ## Reality check
 
-A full modern Android environment is not a normal web application. It requires a guest CPU, memory and device model, boot firmware/kernel, Android system images, writable block storage, graphics and input devices, and a bridge between guest devices and browser APIs. A browser sandbox also limits direct access to host camera, microphone, GPU, and network interfaces.
+A full modern Android environment requires a guest CPU, memory and device model, boot firmware/kernel, Android system images, writable block storage, graphics and input devices, and a bridge between guest devices and browser APIs. Browser sandbox restrictions also affect host camera, microphone, GPU, and network access.
 
-A single HTML file can be a launcher/container, but it cannot conjure a complete Android OS. A standalone offline deliverable would need the compiled emulator runtime and compatible Android images packaged alongside or embedded in the distribution. File-size and browser-memory constraints are substantial.
+A single HTML file can be a launcher/container, but it cannot conjure a complete Android OS. A practical offline distribution would need the compiled emulator runtime and compatible Android images packaged alongside or embedded in the distribution. File-size and browser-memory constraints are substantial.
 
-Google Play services are proprietary Google components. An open-source emulator cannot simply recreate equivalent authenticated Play functionality. The project must distinguish AOSP-compatible operation from licensed Google Play support.
+The selected pthread-enabled QEMU/Wasm path requires a cross-origin-isolated secure context. A local `file://` page cannot set COOP/COEP response headers or register a service worker, so strict direct-file operation and full threaded VM operation may need to be separate delivery modes.
+
+Google Play services are proprietary Google components. An open-source emulator cannot simply recreate equivalent authenticated Play functionality. Distinguish AOSP-compatible operation from licensed Google Play support.
 
 ## Milestones
 
-### M0 — Workspace shell (current)
+### M0 — Workspace shell
 - [x] Browser-openable dashboard
 - [x] Device profile UI
 - [x] IndexedDB APK archive (storage only; not installation)
+- [x] Live browser capability checks
 - [x] Honest capability/status reporting
 
-### M1 — Engine feasibility spike
-- [ ] Compare browser-capable VM/emulator engines and their licenses
-- [ ] Verify current Android kernel/system image boot requirements
-- [ ] Test ARM64 and x86_64 separately
-- [ ] Measure browser memory, startup time, and storage footprint
-- [ ] Decide whether direct file:// opening is feasible or whether localhost/HTTPS is required
+### M1 — VM engine and build pipeline
+- [x] Select experimental QEMU/Wasm as the first engine candidate
+- [x] Add automated ARM64 and x86_64 engine build
+- [x] Add bootable ARM64 BusyBox and x86_64 Alpine smoke-test images
+- [x] Add browser boot-test pages and Chromium automation
+- [ ] Obtain a successful CI run and confirm both Linux guest kernel banners
+- [ ] Measure startup time, memory use, and browser compatibility on ChromeOS
+- [ ] Validate persistent virtual disk and input behavior
 
-### M2 — First real guest boot
-- [ ] Integrate a selected CPU/VM engine
-- [ ] Boot a legally distributable AOSP-derived image
-- [ ] Display guest framebuffer
-- [ ] Keyboard, pointer and touch input bridge
-- [ ] Persistent virtual disk
+### M2 — Android guest boot
+- [ ] Select a legally distributable AOSP-derived Android image and compatible kernel
+- [ ] Confirm the QEMU machine/device model matches the Android image
+- [ ] Boot a real Android guest in the browser
+- [ ] Display guest framebuffer and provide touch/pointer/keyboard input
+- [ ] Persist the Android virtual disk across sessions
 
-### M3 — App execution
-- [ ] APK parsing and package metadata
-- [ ] Guest-side package installation
-- [ ] APK execution and lifecycle
+### M3 — APK execution
+- [ ] Parse APK metadata and package information
+- [ ] Install APKs inside the Android guest using Android package manager
+- [ ] Launch APKs and handle lifecycle
 - [ ] Audio output and input
-- [ ] Network adapter
+- [ ] Guest network adapter
 
 ### M4 — Device and platform features
-- [ ] Multiple isolated guest instances
+- [ ] Multiple isolated Android guest instances
 - [ ] Camera and microphone bridge (permission-gated)
 - [ ] Snapshot / restore
-- [ ] ARM64 and x86_64 compatibility matrix
+- [ ] ARM64 and x86_64 Android compatibility matrix
 - [ ] Play-services compatibility assessment; no claim of Google certification without authorization
 
 ## Acceptance criteria
 
-A feature is complete only when tested in a real guest OS. UI controls, file selection, or a simulated boot animation do not count as emulator functionality.
+A feature is complete only when tested in a real guest OS. UI controls, file selection, simulated boot animations, or a successful emulator compilation do not count as an Android boot or APK execution.
