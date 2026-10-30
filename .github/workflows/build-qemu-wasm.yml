@@ -9,6 +9,8 @@ on:
       - "scripts/check-qemu-wasm.sh"
       - "scripts/serve-coi.py"
       - "scripts/smoke-qemu-wasm.mjs"
+      - "webdroid/qemu-smoke/**"
+      - "webdroid/coi-serviceworker.js"
       - "webdroid/engine/**"
       - ".github/workflows/build-qemu-wasm.yml"
 
