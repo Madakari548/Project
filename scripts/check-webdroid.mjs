@@ -18,6 +18,8 @@ const checks = [
   ["QEMU Linux smoke tests are explicitly not Android", readFileSync(resolve(root, "webdroid/qemu-smoke/raspi3ap.html"), "utf8").includes("Androidではありません")],
 ];
 for (const [name, ok] of checks) { console.log((ok ? "PASS " : "FAIL ") + name); if (!ok) fail(name); }
+const apkTest = run([resolve(root, "scripts/test-apk-inspector.mjs")]);
+if (apkTest.status !== 0) { console.error(apkTest.stderr || apkTest.stdout); fail("APK ZIP/manifest parser test"); } else console.log(apkTest.stdout.trim());
 const inspectorCheck = run(["--check", resolve(root, "webdroid/apk-inspector.js")]);
 if (inspectorCheck.status !== 0) { console.error(inspectorCheck.stderr); fail("APK inspector JavaScript syntax"); } else console.log("PASS APK inspector JavaScript syntax");
 const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).join("\n");
