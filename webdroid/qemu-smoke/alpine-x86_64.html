@@ -16,6 +16,7 @@ body{margin:0;background:#0c0f16;color:#edf2fb;font:14px system-ui,sans-serif}ma
 <script src="../runtime/alpine-x86_64/load-kernel.js"></script>
 <script src="../runtime/alpine-x86_64/load-initramfs.js"></script>
 <script src="../runtime/alpine-x86_64/load-rom.js"></script>
+<script src="../runtime/alpine-x86_64/dist/stack.js"></script>
 <main>
 <p><a href="../index.html">← WebDroidへ戻る</a></p>
 <h1>x86_64 Linux 起動テスト</h1>
@@ -50,10 +51,20 @@ document.getElementById("start").addEventListener("click",async()=>{
  started=true;status.textContent="QEMU/Wasmを初期化しています…";
  try{
   const {master,slave}=openpty();term.loadAddon(master);Module.pty=slave;
-  await initEmscriptenModule(Module);
-  const oldPoll=Module.TTY.stream_ops.poll,pty=Module.pty;
-  Module.TTY.stream_ops.poll=function(stream,timeout){if(!pty.readable)return (pty.readable?1:0)|(pty.writable?4:0);return oldPoll.call(stream,timeout)};
-  status.textContent="QEMUが起動しました。Alpine Linuxのコンソール出力を待っています…";
+  const runtimeBase=new URL("../runtime/alpine-x86_64/",location.href).href;
+  const stackAddress="http://localhost:9999/";
+  const stackWorkerFile=new URL("dist/stack-worker.js",runtimeBase).href;
+  const stackImage=new URL("c2w-net-proxy.wasm.gzip",runtimeBase).href;
+  Module.websocket={url:stackAddress};
+  status.textContent="ブラウザ内ネットワークを初期化しています…";
+  Stack.Start(stackAddress,stackWorkerFile,stackImage,async cert=>{
+   Module.preRun=Module.preRun||[];
+   Module.preRun.push(mod=>{mod.FS.mkdir("/.wasmenv");mod.FS.writeFile("/.wasmenv/proxy.crt",cert)});
+   await initEmscriptenModule(Module);
+   const oldPoll=Module.TTY.stream_ops.poll,pty=Module.pty;
+   Module.TTY.stream_ops.poll=function(stream,timeout){if(!pty.readable)return (pty.readable?1:0)|(pty.writable?4:0);return oldPoll.call(stream,timeout)};
+   status.textContent="Alpine Linuxが起動しました。ブラウザ内ネットワークの初期化を待っています…";
+  });
  }catch(error){started=false;status.textContent="起動失敗: "+(error?.message||String(error));console.error(error)}
 });
 window.webdroidReady=true;
