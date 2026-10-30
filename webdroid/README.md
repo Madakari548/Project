@@ -5,8 +5,8 @@ WebDroid is an experimental project to build an Android virtualization environme
 ## Current status: 0.3.0 — QEMU/Wasm Linux smoke-test integration
 
 The browser workspace currently provides:
-- Device profile management (up to four in this preview)
-- Local APK archive using IndexedDB (storage only, not installation)
+- Device profile management (up to four in this preview), persisted in IndexedDB
+- Local APK archive using IndexedDB, with binary AndroidManifest metadata inspection, SHA-256 when available, and file export (storage only, not installation)
 - Live browser capability checks (WebAssembly, SharedArrayBuffer, COOP/COEP isolation, memory64, OPFS, IndexedDB)
 - Automated build pipeline for experimental QEMU/WebAssembly system emulators targeting ARM64 and x86_64
 - Separate ARM64 BusyBox Linux and x86_64 Alpine Linux browser boot-test pages
