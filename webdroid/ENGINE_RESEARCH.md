@@ -1,0 +1,69 @@
+# Browser Android engine research (2026-10-30)
+
+## Executive decision
+
+Do not integrate v86 as the main engine for the requested modern Android target. Keep it as a possible legacy x86 experiment only.
+
+Run a focused feasibility spike around QEMU compiled to WebAssembly for ARM64 guests, while separately evaluating whether a constrained APK runtime can offer useful early functionality. Do not describe either path as a complete Android emulator until a real Android guest boots and ordinary APKs install and run.
+
+## Findings
+
+### 1. QEMU in WebAssembly / Glasshouse
+
+Glasshouse reports booting an ARM64 phone OS in a browser using QEMU compiled to WebAssembly, a custom ARM64 kernel, browser-managed persistent storage, and a user-supplied restore image. Its published requirements include a modern desktop Chrome, 64-bit Wasm memory, roughly 10 GB of free browser storage, and substantial host RAM. It reports touch and persistent disk support, while sound, network, and camera are listed as not yet implemented.
+
+This is evidence that browser-based ARM64 OS virtualization is technically possible, but it is not evidence that a generic modern Android image will boot unchanged. Glasshouse uses a custom kernel and device drivers and a specific OS restore-image workflow. We must inspect licensing, source availability, kernel/device assumptions, and image compatibility before reusing anything.
+
+Source: https://glasshouse.mojolayers.com/info
+
+### 2. NekoDroid
+
+NekoDroid is an early browser-native ARM emulator written in Rust/WebAssembly. Its published current feature set includes an ARMv7-era CPU core, a limited set of emulated devices, Linux boot plumbing, and a small Dalvik/DEX HLE path demonstrated with a hello APK. Its own README says arbitrary Play Store APKs, multidex, JNI/native libraries, and full Android userspace (zygote, Binder fidelity, SurfaceFlinger) are not implemented.
+
+It may be useful as a research reference or a constrained APK execution experiment, but it is not currently a full Android OS emulator and does not meet the requested ARM64 + x86_64 target.
+
+Source: https://github.com/nishal21/NekoDroid
+
+### 3. v86
+
+v86 is a mature browser-based x86 PC emulator. Its published compatibility notes list Android-x86 tested up to 4.4-r2. That makes it unsuitable as the primary route to a current Android release, and it does not solve ARM64 guest support.
+
+It can remain a useful fallback for a legacy x86 Android proof of concept, not the foundation of the target product.
+
+Source: https://github.com/copy/v86
+
+### 4. QEMU browser backend work
+
+A QEMU patch series published in 2025 describes a browser-oriented TCG backend that translates guest execution into WebAssembly and discusses browser constraints. This is a promising technical direction, but a patch series is not equivalent to a maintained, production-ready browser Android emulator. The exact branch status, build reproducibility, and supported devices/guests must be checked.
+
+Source: https://lists.gnu.org/archive/html/qemu-arm/2025-04/msg00153.html
+
+## Recommended engineering plan
+
+### Spike A — QEMU/Wasm feasibility
+1. Identify a maintained and buildable QEMU-to-Wasm implementation and verify its license.
+2. Confirm whether it can boot an ARM64 Linux guest in the target browser.
+3. Confirm required Wasm features (including memory64 if needed), SharedArrayBuffer/isolation requirements, and ChromeOS compatibility.
+4. Boot a minimal Linux guest before attempting Android.
+5. Record startup time, memory use, disk size, graphics output, input, and persistence.
+
+### Spike B — Android boot feasibility
+1. Select a legally redistributable AOSP-derived Android image and compatible kernel/device model.
+2. Confirm boot chain, virtual block devices, framebuffer/GPU path, input devices, and init requirements.
+3. Attempt a real Android boot; a simulated phone UI does not count.
+4. Only after a successful boot, test package installation and an ordinary non-trivial APK.
+
+### Spike C — APK execution alternative
+Evaluate NekoDroid only as a separate constrained execution path. Clearly label supported APK/API/DEX subsets. Do not present HLE execution as Android compatibility.
+
+## Product constraints and honest status
+
+- A single HTML file can act as a launcher, but a practical emulator will likely need large runtime and guest-image assets alongside it or downloaded on first use. A strict offline single-file bundle is a separate packaging challenge.
+- Local-file URL behavior, WebAssembly memory limits, browser storage quotas, and cross-origin isolation need explicit tests. Do not assume direct-open mode will support every engine feature.
+- ARM64 and x86_64 require separately verified guest execution paths. Host CPU architecture is not guest CPU compatibility.
+- Google Play services are proprietary and cannot be recreated merely by implementing similarly named APIs. Treat AOSP operation and licensed/authorized Play support as separate goals.
+- Camera, microphone, audio, networking, GPU acceleration, and multi-instance support are milestone features, not assumed capabilities.
+
+## Acceptance gate
+
+The first meaningful milestone is a real ARM64 Linux guest booting in the target browser with persistent virtual disk and working display/input. The next is a real Android guest boot. Only then should APK installation and execution be marked implemented.
