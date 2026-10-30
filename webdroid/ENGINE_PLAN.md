@@ -51,7 +51,8 @@ Google Play services are proprietary Google components. An open-source emulator 
 - [ ] Persist the Android virtual disk across sessions
 
 ### M3 — APK execution
-- [ ] Parse APK metadata and package information
+- [x] Parse APK binary Manifest package name/version and calculate a local SHA-256 fingerprint when supported
+- [ ] Full APK compatibility analysis (split APKs, ABI, SDK requirements, signing and native libraries)
 - [ ] Install APKs inside the Android guest using Android package manager
 - [ ] Launch APKs and handle lifecycle
 - [ ] Audio output and input
