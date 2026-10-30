@@ -1,4 +1,6 @@
-import { chromium } from "playwright";
+import { createRequire } from "node:module";
+const require = createRequire(new URL("../webdroid/qemu-smoke/package.json", import.meta.url));
+const { chromium } = require("playwright");
 
 const origin = process.env.WEBDROID_TEST_ORIGIN || "http://127.0.0.1:8765";
 const cases = [
