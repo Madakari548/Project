@@ -26,17 +26,24 @@ Google Play services are proprietary Google components. An open-source emulator 
 - [x] IndexedDB APK archive (storage only; not installation)
 - [x] Live browser capability checks
 - [x] Honest capability/status reporting
+- [x] Persist device profiles in IndexedDB
+- [x] Inspect APK ZIP manifest metadata and calculate SHA-256 when Web Crypto is available
+- [x] Download APKs back from the local archive
 
 ### M1 — VM engine and build pipeline
 - [x] Select experimental QEMU/Wasm as the first engine candidate
 - [x] Add automated ARM64 and x86_64 engine build
 - [x] Add bootable ARM64 BusyBox and x86_64 Alpine smoke-test images
 - [x] Add browser boot-test pages and Chromium automation
+- [x] Add static syntax and project-wiring checks for the dashboard and APK inspector
 - [ ] Obtain a successful CI run and confirm both Linux guest kernel banners
 - [ ] Measure startup time, memory use, and browser compatibility on ChromeOS
 - [ ] Validate persistent virtual disk and input behavior
 
 ### M2 — Android guest boot
+- [x] Select LineageOS-for-QEMU as the first Android VM candidate for ARM64 and x86_64
+- [ ] Retrieve and inspect the published VM archives and their licenses
+- [ ] Confirm QEMU/Wasm support for the candidate VM device model and firmware
 - [ ] Select a legally distributable AOSP-derived Android image and compatible kernel
 - [ ] Confirm the QEMU machine/device model matches the Android image
 - [ ] Boot a real Android guest in the browser
