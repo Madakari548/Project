@@ -107,8 +107,13 @@ async function findManifest(file) {
   throw new Error("AndroidManifest.xmlが見つかりません");
 }
 export async function inspectApk(file) {
-  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
-  const sha256 = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+  let sha256 = null;
+  try {
+    if (globalThis.crypto?.subtle) {
+      const digest = await globalThis.crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+      sha256 = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+    }
+  } catch { /* file:// contexts may not expose SubtleCrypto */ }
   let manifest = null, manifestError = null;
   try { manifest = await findManifest(file); } catch (error) { manifestError = error.message || String(error); }
   return { sha256, manifest, manifestError };
