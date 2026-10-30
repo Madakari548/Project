@@ -35,6 +35,7 @@ Google Play services are proprietary Google components. An open-source emulator 
 - [x] Add automated ARM64 and x86_64 engine build
 - [x] Add bootable ARM64 BusyBox and x86_64 Alpine smoke-test images
 - [x] Add browser boot-test pages and Chromium automation
+- [x] Wire the upstream browser-side networking stack into the x86_64 Linux test page (guest connectivity still needs runtime verification)
 - [x] Add static syntax and project-wiring checks for the dashboard and APK inspector
 - [ ] Obtain a successful CI run and confirm both Linux guest kernel banners
 - [ ] Measure startup time, memory use, and browser compatibility on ChromeOS
