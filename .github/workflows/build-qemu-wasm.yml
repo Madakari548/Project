@@ -7,6 +7,8 @@ on:
     paths:
       - "scripts/build-qemu-wasm.sh"
       - "scripts/check-qemu-wasm.sh"
+      - "scripts/serve-coi.py"
+      - "scripts/smoke-qemu-wasm.mjs"
       - "webdroid/engine/**"
       - ".github/workflows/build-qemu-wasm.yml"
 
@@ -28,13 +30,32 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build ARM64 and x86_64 QEMU engines
+      - name: Build QEMU/Wasm and two Linux guest images
         run: bash scripts/build-qemu-wasm.sh
 
-      - name: Verify generated engines
+      - name: Verify generated engines and guest assets
         run: bash scripts/check-qemu-wasm.sh
 
-      - name: Upload QEMU WebAssembly artifacts
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Start isolated static test server
+        run: |
+          python3 scripts/serve-coi.py --root webdroid --port 8765 > /tmp/webdroid-coi-server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8765/qemu-smoke/raspi3ap.html >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8765/qemu-smoke/raspi3ap.html >/dev/null
+
+      - name: Boot ARM64 and x86_64 Linux guests in Chromium
+        run: node scripts/smoke-qemu-wasm.mjs
+
+      - name: Upload QEMU WebAssembly engines and Linux guest assets
         uses: actions/upload-artifact@v4
         with:
           name: webdroid-qemu-wasm-engines
