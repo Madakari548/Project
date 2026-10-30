@@ -53,6 +53,7 @@ document.getElementById("start").addEventListener("click",async()=>{
   status.textContent="QEMUが起動しました。Linuxのコンソール出力を待っています…";
  }catch(error){started=false;status.textContent="起動失敗: "+(error?.message||String(error));console.error(error)}
 });
+window.webdroidReady=true;
 status.textContent=location.protocol==="file:"?"file://ではCOIサービスワーカーを使えません。HTTPSで開いてください。":(crossOriginIsolated?"起動条件を満たしています。":"COIサービスワーカーを準備中です。初回は自動再読み込み後に再試行してください。");
 </script>
 </body></html>
