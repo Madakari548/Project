@@ -1,0 +1,36 @@
+name: Build QEMU WebAssembly engines
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build-qemu-wasm.sh"
+      - "webdroid/engine/**"
+      - ".github/workflows/build-qemu-wasm.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-qemu-wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Check out WebDroid
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ARM64 and x86_64 QEMU engines
+        run: bash scripts/build-qemu-wasm.sh
+
+      - name: Upload QEMU WebAssembly artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: webdroid-qemu-wasm-engines
+          path: |
+            webdroid/runtime/
+          if-no-files-found: error
+          retention-days: 14
