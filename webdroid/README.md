@@ -2,7 +2,7 @@
 
 WebDroid is an experimental project to build an Android virtualization environment that runs in a web browser.
 
-## Current status: 0.3.0 — QEMU/Wasm Linux smoke-test integration
+## Current status: 0.4.0 — Android guest research and APK inspection
 
 The browser workspace currently provides:
 - Device profile management (up to four in this preview), persisted in IndexedDB
