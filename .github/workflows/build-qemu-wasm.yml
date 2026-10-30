@@ -6,11 +6,16 @@ on:
     branches: [main]
     paths:
       - "scripts/build-qemu-wasm.sh"
+      - "scripts/check-qemu-wasm.sh"
       - "webdroid/engine/**"
       - ".github/workflows/build-qemu-wasm.yml"
 
 permissions:
   contents: read
+
+concurrency:
+  group: webdroid-qemu-wasm-build
+  cancel-in-progress: true
 
 jobs:
   build-qemu-wasm:
@@ -26,11 +31,13 @@ jobs:
       - name: Build ARM64 and x86_64 QEMU engines
         run: bash scripts/build-qemu-wasm.sh
 
+      - name: Verify generated engines
+        run: bash scripts/check-qemu-wasm.sh
+
       - name: Upload QEMU WebAssembly artifacts
         uses: actions/upload-artifact@v4
         with:
           name: webdroid-qemu-wasm-engines
-          path: |
-            webdroid/runtime/
+          path: webdroid/runtime/
           if-no-files-found: error
           retention-days: 14
