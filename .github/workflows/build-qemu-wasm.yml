@@ -59,9 +59,19 @@ jobs:
         run: node scripts/smoke-qemu-wasm.mjs
 
       - name: Upload QEMU WebAssembly engines and Linux guest assets
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: webdroid-qemu-wasm-engines
           path: webdroid/runtime/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
+
+      - name: Upload browser smoke-test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: webdroid-qemu-wasm-smoke-diagnostics
+          path: /tmp/webdroid-coi-server.log
+          if-no-files-found: ignore
+          retention-days: 7
