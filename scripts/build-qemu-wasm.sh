@@ -39,9 +39,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
+CI_SCRIPT="$WORK/create-images-ci.sh"
+sed 's/docker exec -it/docker exec/g' "$DEMO_SRC/create-images.sh" > "$CI_SCRIPT"
+chmod +x "$CI_SCRIPT"
 (
   cd "$DEMO_SRC"
-  QEMU_WASM_REPO="$QEMU_SRC" bash ./create-images.sh
+  QEMU_WASM_REPO="$QEMU_SRC" bash "$CI_SCRIPT"
 )
 cp -a "$DEMO_SRC/out/." "$OUT/"
 
