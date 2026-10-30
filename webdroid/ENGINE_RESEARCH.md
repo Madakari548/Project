@@ -75,3 +75,18 @@ Evaluate NekoDroid only as a separate constrained execution path. Clearly label 
 ## Acceptance gate
 
 The build pipeline and two browser smoke-test pages have been committed, but their generated binaries and guest images still need a successful CI build and browser boot verification. The first completed milestone requires both ARM64 and x86_64 Linux guests to boot in the target browser. The next is a real Android guest boot. Only then should APK installation and execution be marked implemented.
+
+### 5. Android guest candidate: LineageOS virtual machines for QEMU
+
+A stronger Android boot candidate has been identified: `jqssun/android-lineage-qemu`. Its build script targets both `virtio_arm64only` and `virtio_x86_64` on the LineageOS `lineage-24.0` branch, and its releases publish UTM VM archives and OTA packages for both architectures. The documented VM configuration uses QEMU's ARM `virt` machine and x86 `q35` machine, UEFI firmware, qcow2 disks, VirtIO storage/network/display devices, and USB input.
+
+This gives WebDroid a real Android kernel + userspace + virtual hardware target, rather than a generic GSI that still needs a matching vendor implementation. A downloader/inspector workflow has been added to retrieve the latest public ARM64 and x86_64 VM archives without committing multi-gigabyte binaries into Git.
+
+The Android guest is **not integrated or booted yet**. The current QEMU/Wasm build was configured and smoke-tested only for a Raspberry Pi ARM64 Linux guest and an x86_64 Alpine PC guest. The QEMU Wasm build must be checked for the Lineage VM's `virt`/`q35` devices, UEFI/pflash, qcow2, VirtIO GPU, USB, and networking before an Android boot can be attempted.
+
+Sources:
+- https://github.com/jqssun/android-lineage-qemu
+- https://github.com/jqssun/android-lineage-qemu/releases/latest
+- https://www.qemu.org/docs/master/system/target-arm.html
+- https://source.android.com/docs/core/tests/vts/gsi
+
