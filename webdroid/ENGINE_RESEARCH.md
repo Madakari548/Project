@@ -90,3 +90,17 @@ Sources:
 - https://www.qemu.org/docs/master/system/target-arm.html
 - https://source.android.com/docs/core/tests/vts/gsi
 
+
+### 6. Browser-only legacy Android alternatives evaluated
+
+Two projects demonstrate useful but narrower browser paths:
+
+- `Z3BOS/afterburner` uses v86 (a JIT x86 emulator) and reports a browser boot test of Android-x86 1.6 through its boot menu, with curated images up to Android-x86 9.0. Its own architecture notes say the browser path has not verified the full graphical home screen for all releases, and v86 lacks the 64-bit CPU features and multicore support needed by newer guests. It is useful as a legacy x86 experiment, but it does not meet WebDroid's latest-Android + ARM64 requirements.
+- `nishal21/NekoDroid` is a browser-native ARMv7 Wasm emulator with a constrained Dalvik HLE path. Its own README explicitly says arbitrary Play Store APKs, JNI/native libraries, and full Android userspace (Zygote, Binder, SurfaceFlinger) are not supported. It is not a full Android OS emulator.
+
+These are not selected as the primary engine, but their browser storage, JIT, and APK-loading approaches remain useful references.
+
+Sources:
+- https://github.com/Z3BOS/afterburner
+- https://github.com/nishal21/NekoDroid
+
