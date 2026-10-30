@@ -28,7 +28,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check Python syntax
-        run: python3 -m py_compile scripts/fetch-lineage-vm.py scripts/serve-coi.py
+      - name: Check shell and Python syntax
+        run: |
+          bash -n scripts/build-qemu-wasm.sh scripts/check-qemu-wasm.sh
+          python3 -m py_compile scripts/fetch-lineage-vm.py scripts/serve-coi.py
       - name: Check JavaScript and project wiring
         run: node scripts/check-webdroid.mjs
