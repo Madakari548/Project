@@ -114,7 +114,7 @@ async function findManifest(file) {
   }
   throw new Error("AndroidManifest.xmlが見つかりません");
 }
-export async function inspectApk(file) {
+async function inspectApk(file) {
   let sha256 = null;
   try {
     if (globalThis.crypto?.subtle && file.size <= 128 * 1024 * 1024) {
@@ -126,3 +126,5 @@ export async function inspectApk(file) {
   try { manifest = await findManifest(file); } catch (error) { manifestError = error.message || String(error); }
   return { sha256, manifest, manifestError };
 }
+
+window.inspectWebDroidApk = inspectApk;
