@@ -31,6 +31,7 @@ try {
       throw new Error("Browser context is not cross-origin isolated: " + JSON.stringify(isolated));
     }
 
+    await page.waitForFunction(() => window.webdroidReady === true, null, { timeout: 120000 });
     await page.locator("#start").click();
     try {
       await page.waitForFunction(
