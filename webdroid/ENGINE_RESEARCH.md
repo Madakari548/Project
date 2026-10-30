@@ -32,20 +32,28 @@ It can remain a useful fallback for a legacy x86 Android proof of concept, not t
 
 Source: https://github.com/copy/v86
 
-### 4. QEMU browser backend work
+### 4. QEMU Wasm and an existing Linux boot demo
 
-A QEMU patch series published in 2025 describes a browser-oriented TCG backend that translates guest execution into WebAssembly and discusses browser constraints. This is a promising technical direction, but a patch series is not equivalent to a maintained, production-ready browser Android emulator. The exact branch status, build reproducibility, and supported devices/guests must be checked.
+The practical candidate is now the experimental `ktock/qemu-wasm` fork. Its README documents Emscripten builds of both `qemu-system-aarch64` and `qemu-system-x86_64`. A companion project, `ktock/qemu-wasm-demo`, builds a real ARM64 Raspberry Pi 3A+ BusyBox Linux guest and an x86_64 Alpine Linux guest, then starts them in a browser with QEMU/Wasm and an xterm pseudo-terminal.
 
-Source: https://lists.gnu.org/archive/html/qemu-arm/2025-04/msg00153.html
+This is a much better first engineering milestone than trying to boot Android immediately: it tests both requested guest CPU architectures using actual guest kernels and root filesystems. It is still an experimental QEMU fork, not an Android emulator. The upstream build currently pins Emscripten 3.1.50, and the browser examples rely on pthreads, worker files, and COOP/COEP isolation.
+
+Sources:
+- https://github.com/ktock/qemu-wasm
+- https://github.com/ktock/qemu-wasm-demo
+
+The 2026 QEMU Wasm issue tracker also shows active development and outstanding correctness/boot issues, including a report about Asyncify rewind during guest SD reads and a TCG POPCNT bug. This reinforces the need to test the exact built guest rather than assuming upstream claims guarantee compatibility.
+
+Source: https://github.com/ktock/qemu-wasm/issues
 
 ## Recommended engineering plan
 
-### Spike A — QEMU/Wasm feasibility
-1. Identify a maintained and buildable QEMU-to-Wasm implementation and verify its license.
-2. Confirm whether it can boot an ARM64 Linux guest in the target browser.
-3. Confirm required Wasm features (including memory64 if needed), SharedArrayBuffer/isolation requirements, and ChromeOS compatibility.
-4. Boot a minimal Linux guest before attempting Android.
-5. Record startup time, memory use, disk size, graphics output, input, and persistence.
+### Spike A — QEMU/Wasm feasibility (build pipeline added)
+1. Build the upstream ARM64 and x86_64 QEMU/Wasm targets.
+2. Build the companion ARM64 BusyBox and x86_64 Alpine guest images.
+3. Boot both Linux guests in the browser and record failures, startup time, memory use, and console output.
+4. Validate COOP/COEP service-worker behavior on static HTTPS hosting and compare it with the direct-file dashboard.
+5. Only after Linux smoke tests pass, begin Android machine/kernel/image compatibility work.
 
 ### Spike B — Android boot feasibility
 1. Select a legally redistributable AOSP-derived Android image and compatible kernel/device model.
@@ -66,4 +74,4 @@ Evaluate NekoDroid only as a separate constrained execution path. Clearly label 
 
 ## Acceptance gate
 
-The first meaningful milestone is a real ARM64 Linux guest booting in the target browser with persistent virtual disk and working display/input. The next is a real Android guest boot. Only then should APK installation and execution be marked implemented.
+The build pipeline and two browser smoke-test pages have been committed, but their generated binaries and guest images still need a successful CI build and browser boot verification. The first completed milestone requires both ARM64 and x86_64 Linux guests to boot in the target browser. The next is a real Android guest boot. Only then should APK installation and execution be marked implemented.
