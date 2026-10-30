@@ -31,6 +31,15 @@ import initEmscriptenModule from "../runtime/raspi3ap/out.js";
 const status=document.getElementById("status");
 const term=new Terminal({convertEol:true,cols:100,rows:28,theme:{background:"#05070b"}});
 term.open(document.getElementById("terminal"));
+window.webdroidGuestOutput="";
+term.options.scrollback=10000;
+term.onWriteParsed(()=>{
+ const buffer=term.buffer.active;
+ const lines=[];
+ for(let i=0;i<buffer.length;i++){const line=buffer.getLine(i);if(line)lines.push(line.translateToString(true))}
+ window.webdroidGuestOutput=lines.join("\\n");
+ if(window.webdroidGuestOutput.includes("Linux version"))status.textContent="Linuxカーネルの起動を確認しました。";
+});
 let started=false;
 document.getElementById("start").addEventListener("click",async()=>{
  if(started)return;
