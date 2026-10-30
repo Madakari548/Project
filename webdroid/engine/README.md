@@ -22,6 +22,7 @@ bash scripts/check-qemu-wasm.sh
 The build script clones the two upstream repositories and runs the upstream demo's reproducible Docker build. The output includes:
 - ARM64 QEMU/Wasm engine and a Raspberry Pi 3A+ BusyBox Linux guest
 - x86_64 QEMU/Wasm engine and an Alpine Linux guest
+- Browser-side networking proxy assets for the x86_64 Alpine guest, based on the upstream MSW/WASI network stack
 
 GitHub Actions runs this automatically when the build configuration changes, starts a COOP/COEP-enabled local server, and uses headless Chromium to verify that both guests print a Linux kernel banner. Generated engine and guest files are stored as a 14-day workflow artifact.
 
